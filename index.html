@@ -179,6 +179,8 @@
       .then(function(){ btn.disabled=false; btn.textContent='Participar do sorteio'; });
   });
 
+  // Para testes: abrir o link com ?novo limpa o número salvo neste aparelho
+  if(/[?&]novo\b/.test(location.search)){ try{localStorage.removeItem(KEY)}catch(e){} history.replaceState(null,'',location.pathname); }
   var s = load();
   if(s && s.numero && INSTAGRAM[s.marca]) done(s.numero, s.nome, s.marca);
 })();
