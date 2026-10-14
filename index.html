@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f1e7">
+<title>Sorteio Grupo Plasfran</title>
+<meta name="robots" content="noindex">
+<link rel="preload" as="image" href="bg.webp">
+<style>
+  :root{
+    --cream:#f6f1e7; --green:#1f6b3a; --green-dark:#17502b; --ink:#2b2b2b; --muted:#6b645a;
+    --tan:#b98a58; --glass:rgba(255,255,255,.66); --line:rgba(255,255,255,.75);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--cream);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .stage{position:relative;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;
+    background:url(bg.webp) center/cover no-repeat;
+    padding:calc(25dvh) 18px calc(28px + env(safe-area-inset-bottom));overflow:hidden}
+  .card{background:var(--glass);-webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%);
+    border:1px solid var(--line);border-radius:22px;padding:14px 14px;
+    box-shadow:0 8px 30px rgba(60,45,25,.14)}
+  .screen{display:none;animation:in .25s ease}
+  .screen.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h1{font-size:19px;line-height:1.25;margin:0 0 4px;text-align:center;font-weight:800}
+  .sub{font-size:13.5px;color:var(--muted);text-align:center;margin:0 0 14px;line-height:1.4}
+  .brands{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .brand{appearance:none;border:1.5px solid rgba(255,255,255,.9);background:rgba(255,255,255,.7);
+    border-radius:16px;padding:18px 8px;font:inherit;font-weight:800;font-size:16px;cursor:pointer;
+    color:var(--ink);transition:transform .08s,background .15s}
+  .brand:active{transform:scale(.97)}
+  .brand.plaspet{color:var(--green)}
+  .brand small{display:block;font-weight:600;font-size:11.5px;color:var(--muted);margin-top:3px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--green-dark);
+    background:rgba(31,107,58,.1);border-radius:999px;padding:4px 10px;margin:0 auto 8px}
+  .chip-wrap{text-align:center}
+  .chip button{all:unset;cursor:pointer;text-decoration:underline;font-weight:600;color:var(--muted)}
+  .field label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .field{margin-bottom:8px}
+  input[type=text],input[type=tel],input[type=email]{width:100%;font:inherit;font-size:16px;padding:11px 14px;
+    border-radius:12px;border:1.5px solid rgba(255,255,255,.95);background:rgba(255,255,255,.82);color:var(--ink);outline:none}
+  input:focus{border-color:var(--green);background:#fff}
+  input.err{border-color:#c0392b}
+  .hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+  .lgpd{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.35;color:var(--muted);margin:4px 0 12px}
+  .lgpd input{margin-top:2px;width:18px;height:18px;accent-color:var(--green);flex:none}
+  .btn{width:100%;appearance:none;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:800;font-size:16px;
+    color:#fff;background:var(--green);cursor:pointer;box-shadow:0 6px 16px rgba(31,107,58,.3)}
+  .btn:disabled{opacity:.65}
+  .btn.miri{background:#3a3a3a;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+  .msg{color:#b03020;font-size:13px;text-align:center;margin:0 0 10px;min-height:0}
+  .num-label{text-align:center;font-size:13px;color:var(--muted);font-weight:600}
+  .num{font-size:64px;line-height:1;font-weight:900;text-align:center;color:var(--green-dark);margin:2px 0 8px;letter-spacing:1px}
+  .num.miri{color:#3a3a3a}
+  .box{background:rgba(255,255,255,.6);border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.45;text-align:center;margin-bottom:10px}
+  .box b{color:var(--green-dark)}
+  .ig{display:block;text-decoration:none;text-align:center}
+</style>
+</head>
+<body>
+<main class="stage">
+  <section class="card">
+
+    <!-- Tela 1: marca -->
+    <div class="screen on" id="s-marca">
+      <h1>Participe do sorteio!</h1>
+      <p class="sub">De qual marca você veio?</p>
+      <div class="brands">
+        <button class="brand plaspet" data-marca="Plaspet" type="button">Plaspet<small>Memorial &amp; Crematório</small></button>
+        <button class="brand" data-marca="Mirimóveis" type="button">Mirimóveis<small>Móveis</small></button>
+      </div>
+    </div>
+
+    <!-- Tela 2: dados -->
+    <form class="screen" id="s-dados" novalidate autocomplete="on">
+      <div class="chip-wrap"><span class="chip">Você veio da <span id="marcaTxt"></span> · <button type="button" id="trocar">trocar</button></span></div>
+      <div class="field"><label for="nome">Nome completo</label><input id="nome" name="nome" type="text" autocomplete="name" placeholder="Seu nome"></div>
+      <div class="field"><label for="tel">Telefone (WhatsApp)</label><input id="tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" maxlength="15"></div>
+      <div class="field"><label for="email">E-mail</label><input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@email.com"></div>
+      <input class="hp" type="text" id="site" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label class="lgpd" for="lgpd"><input type="checkbox" id="lgpd"><span>Autorizo o contato e o uso dos meus dados pelo Grupo Plasfran (Plaspet e Mirimóveis) para o sorteio e comunicações, conforme a LGPD.</span></label>
+      <p class="msg" id="msg" role="alert"></p>
+      <button class="btn" id="enviar" type="submit">Participar do sorteio</button>
+    </form>
+
+    <!-- Tela 3: agradecimento -->
+    <div class="screen" id="s-ok">
+      <h1>Inscrição confirmada! 🎉</h1>
+      <p class="sub" id="ola"></p>
+      <div class="num-label">Seu número do sorteio</div>
+      <div class="num" id="numero">--</div>
+      <div class="box">📸 <b>Tire um print desta tela</b> para guardar seu número.<br>
+        Sorteio de uma <b>Alexa</b> entre os participantes do Grupo Plasfran:<br><b>sábado, 17/10, às 19h</b>.</div>
+      <div class="box">Siga o nosso perfil, mostre ao pessoal do estande e <b>retire seu brinde</b>!</div>
+      <a class="btn ig" id="ig" href="#" target="_blank" rel="noopener">Seguir no Instagram</a>
+    </div>
+
+  </section>
+</main>
+
+<script>
+(function(){
+  // >>> Cole aqui a URL do Apps Script (Implantar > App da Web) <<<
+  var API_URL = 'https://script.google.com/macros/s/AKfycbwU1VN7i6C8uU1GGv6LtrdlZeG8L7Af7q7WrElQ-BBbl5mEs8qdKfvnVjD0ZcsnICCA/exec';
+
+  var INSTAGRAM = {
+    'Plaspet':    {url:'https://www.instagram.com/plasfranoficial/', handle:'@plasfranoficial'},
+    'Mirimóveis': {url:'https://www.instagram.com/miri_moveis/',     handle:'@miri_moveis'}
+  };
+  var KEY = 'plasfran_sorteio_v1';
+  var $ = function(id){return document.getElementById(id)};
+  var marca = null;
+
+  function show(id){
+    ['s-marca','s-dados','s-ok'].forEach(function(s){$(s).classList.toggle('on', s===id)});
+    window.scrollTo(0,0);
+  }
+  function save(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+
+  function done(numero, nome, m){
+    var i = INSTAGRAM[m];
+    $('numero').textContent = String(numero).padStart(2,'0');
+    $('numero').className = 'num' + (m==='Mirimóveis' ? ' miri' : '');
+    $('ola').textContent = nome ? ('Obrigado, ' + nome.split(' ')[0] + '!') : 'Obrigado por participar!';
+    $('ig').href = i.url;
+    $('ig').textContent = 'Seguir ' + i.handle + ' no Instagram';
+    $('ig').className = 'btn ig' + (m==='Mirimóveis' ? ' miri' : '');
+    show('s-ok');
+  }
+
+  document.querySelectorAll('.brand').forEach(function(b){
+    b.addEventListener('click', function(){
+      marca = b.dataset.marca;
+      $('marcaTxt').textContent = marca;
+      $('enviar').className = 'btn' + (marca==='Mirimóveis' ? ' miri' : '');
+      show('s-dados');
+    });
+  });
+  $('trocar').addEventListener('click', function(){show('s-marca')});
+
+  $('tel').addEventListener('input', function(){
+    var d = this.value.replace(/\D/g,'').slice(0,11), o = d;
+    if(d.length>2) o = '('+d.slice(0,2)+') '+d.slice(2);
+    if(d.length>7) o = '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
+    this.value = o;
+  });
+
+  function setErr(el, bad){el.classList.toggle('err', !!bad); return !!bad}
+
+  $('s-dados').addEventListener('submit', function(e){
+    e.preventDefault();
+    var msg = $('msg'); msg.textContent='';
+    var nome = $('nome').value.trim(), tel = $('tel').value.trim(), email = $('email').value.trim();
+    var telD = tel.replace(/\D/g,'');
+    var bad = [
+      setErr($('nome'), nome.length < 3),
+      setErr($('tel'), telD.length < 10),
+      setErr($('email'), !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
+    ];
+    if(bad.some(Boolean)){ msg.textContent='Confira os campos destacados.'; return; }
+    if(!$('lgpd').checked){ msg.textContent='É preciso autorizar o uso dos dados para participar.'; return; }
+    if($('site').value){ return; } // honeypot
+    if(API_URL.indexOf('http')!==0){ msg.textContent='Formulário ainda não configurado.'; return; }
+
+    var btn = $('enviar'); btn.disabled = true; btn.textContent = 'Enviando…';
+    var ctrl = new AbortController(), t = setTimeout(function(){ctrl.abort()}, 25000);
+    fetch(API_URL, {method:'POST', body: JSON.stringify({marca:marca, nome:nome, telefone:tel, email:email, consentimento:true}), signal: ctrl.signal})
+      .then(function(r){return r.json()})
+      .then(function(j){
+        clearTimeout(t);
+        if(j && j.ok){ save({numero:j.numero, nome:nome, marca:marca}); done(j.numero, nome, marca); }
+        else if(j && j.erro==='limite'){ msg.textContent='As inscrições estão encerradas. Procure a equipe no estande.'; }
+        else { throw new Error('resp'); }
+      })
+      .catch(function(){ clearTimeout(t); msg.textContent='Não foi possível enviar. Verifique o sinal e tente de novo.'; })
+      .then(function(){ btn.disabled=false; btn.textContent='Participar do sorteio'; });
+  });
+
+  var s = load();
+  if(s && s.numero && INSTAGRAM[s.marca]) done(s.numero, s.nome, s.marca);
+})();
+</script>
+</body>
+</html>
