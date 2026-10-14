@@ -1,11 +1,12 @@
 /**
  * Sorteio Grupo Plasfran - recebe o formulário e grava na planilha.
- * Abas: "Plaspet" e "Mirimóveis" (criadas automaticamente se não existirem).
- * Número do sorteio = sequência única entre as duas abas (1, 2, 3...).
+ * Uma única aba ("Leads") para as duas marcas; a coluna "Marca" diz de onde veio cada lead.
+ * Número do sorteio = sequência única (1, 2, 3...) na ordem de preenchimento.
  * Mesmo telefone OU mesmo e-mail => devolve o número já existente, sem nova linha.
  */
 var LIMITE = 1000;
-var ABAS = ['Plaspet', 'Mirimóveis'];
+var MARCAS = ['Plaspet', 'Mirimóveis'];
+var ABA = 'Leads';
 var CABECALHO = ['Nº Sorteio', 'Data/Hora', 'Nome', 'Telefone', 'E-mail', 'Marca', 'Consentimento LGPD'];
 
 function doPost(e) {
@@ -15,21 +16,20 @@ function doPost(e) {
     var d = JSON.parse(e.postData.contents);
 
     var marca = String(d.marca || '');
-    if (ABAS.indexOf(marca) < 0) return out({ ok: false, erro: 'marca' });
+    if (MARCAS.indexOf(marca) < 0) return out({ ok: false, erro: 'marca' });
     var nome = String(d.nome || '').trim();
     var tel = String(d.telefone || '').trim();
     var email = String(d.email || '').trim();
     if (!nome || !tel || !email || d.consentimento !== true) return out({ ok: false, erro: 'dados' });
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var abas = ABAS.map(function (n) { return aba(ss, n); });
+    var sh = aba(ss, ABA);
 
     var telKey = normTel(tel), emailKey = email.toLowerCase();
     var maior = 0;
-    for (var i = 0; i < abas.length; i++) {
-      var n = abas[i].getLastRow();
-      if (n < 2) continue;
-      var v = abas[i].getRange(2, 1, n - 1, 5).getValues();
+    var n = sh.getLastRow();
+    if (n >= 2) {
+      var v = sh.getRange(2, 1, n - 1, 5).getValues();
       for (var r = 0; r < v.length; r++) {
         var num = Number(v[r][0]) || 0;
         if (num > maior) maior = num;
@@ -42,8 +42,7 @@ function doPost(e) {
     var numero = maior + 1;
     if (numero > LIMITE) return out({ ok: false, erro: 'limite' });
 
-    var sh = abas[ABAS.indexOf(marca)];
-    var linha = sh.getLastRow() + 1;
+    var linha = n + 1;
     sh.getRange(linha, 4).setNumberFormat('@');
     sh.getRange(linha, 1, 1, 7).setValues([[numero, new Date(), nome, tel, email, marca, 'Sim']]);
     SpreadsheetApp.flush();

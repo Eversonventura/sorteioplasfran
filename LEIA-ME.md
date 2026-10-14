@@ -3,7 +3,7 @@
 Formulário mobile (HTML puro) → Google Apps Script → Google Sheets.
 
 - `index.html` + `bg.webp`: a página.
-- `apps-script/Code.gs`: script que grava na planilha (abas **Plaspet** e **Mirimóveis**), numera em sequência única (limite 1000) e devolve o mesmo número se telefone ou e-mail já existir.
+- `apps-script/Code.gs`: script que grava na planilha (aba única **Leads**, com a coluna Marca), numera em sequência única (limite 1000) e devolve o mesmo número se telefone ou e-mail já existir.
 - `qrcode-sorteio.png` / `.svg`: QR Code para https://grupoplasfransorteio.vercel.app/
 
 ## Configuração (uma vez)
