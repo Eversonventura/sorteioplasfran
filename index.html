@@ -57,6 +57,11 @@
   .box{background:rgba(255,255,255,.6);border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.45;text-align:center;margin-bottom:10px}
   .box b{color:var(--green-dark)}
   .ig{display:block;text-decoration:none;text-align:center}
+  .btn.ghost{background:rgba(255,255,255,.85);color:var(--green-dark);box-shadow:none;border:1.5px solid var(--green);margin-top:10px}
+  .btn.ghost.miri{color:#3a3a3a;border-color:#3a3a3a;background:rgba(255,255,255,.85);box-shadow:none}
+  .outra{margin-top:10px}
+  .outra .box{margin:0 0 8px}
+  .outra a.lnk{color:var(--green-dark);font-weight:700}
 </style>
 </head>
 <body>
@@ -89,12 +94,13 @@
     <div class="screen" id="s-ok">
       <h1>Inscrição confirmada! 🎉</h1>
       <p class="sub" id="ola"></p>
-      <div class="num-label">Seu número do sorteio</div>
+      <div class="num-label" id="numLabel">Seu número do sorteio</div>
       <div class="num" id="numero">--</div>
       <div class="box">📸 <b>Tire um print desta tela</b> para guardar seu número.<br>
         Sorteio de um <b>prêmio</b> entre os participantes do Grupo Plasfran:<br><b>sábado, 17/10, às 19h</b>.</div>
       <div class="box">Siga o nosso perfil, mostre ao pessoal do estande e <b>retire seu brinde</b>!</div>
       <a class="btn ig" id="ig" href="#" target="_blank" rel="noopener">Seguir no Instagram</a>
+      <div class="outra" id="outra"></div>
     </div>
 
   </section>
@@ -109,34 +115,66 @@
     'Plaspet':    {url:'https://www.instagram.com/plasfranoficial/', handle:'@plasfranoficial'},
     'Mirimóveis': {url:'https://www.instagram.com/miri_moveis/',     handle:'@miri_moveis'}
   };
-  var KEY = 'plasfran_sorteio_v1';
+  var KEY = 'plasfran_sorteio_v2', OLD = 'plasfran_sorteio_v1';
   var $ = function(id){return document.getElementById(id)};
   var marca = null;
+  var outraDe = function(m){return m==='Plaspet' ? 'Mirimóveis' : 'Plaspet'};
+  var cls = function(m){return m==='Mirimóveis' ? ' miri' : ''};
+  var pad = function(n){return String(n).padStart(2,'0')};
+
+  // Guarda neste aparelho um cadastro por marca: {Plaspet:{numero,nome,tel,email}, Mirimóveis:{...}, last:'Plaspet'}
+  function loadAll(){
+    try{ var o = JSON.parse(localStorage.getItem(KEY)); if(o && typeof o==='object') return o; }catch(e){}
+    try{ var v = JSON.parse(localStorage.getItem(OLD)); if(v && v.numero && INSTAGRAM[v.marca]){ var r={last:v.marca}; r[v.marca]={numero:v.numero,nome:v.nome}; return r; } }catch(e){}
+    return {};
+  }
+  function saveAll(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+  var store = loadAll();
 
   function show(id){
     ['s-marca','s-dados','s-ok'].forEach(function(s){$(s).classList.toggle('on', s===id)});
     window.scrollTo(0,0);
   }
-  function save(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
-  function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
 
-  function done(numero, nome, m){
-    var i = INSTAGRAM[m];
-    $('numero').textContent = String(numero).padStart(2,'0');
-    $('numero').className = 'num' + (m==='Mirimóveis' ? ' miri' : '');
-    $('ola').textContent = nome ? ('Obrigado, ' + nome.split(' ')[0] + '!') : 'Obrigado por participar!';
+  function openForm(m){
+    marca = m;
+    $('marcaTxt').textContent = m;
+    $('enviar').className = 'btn' + cls(m);
+    var p = store[store.last] || store[outraDe(m)] || {};   // reaproveita os dados já digitados
+    $('nome').value = p.nome || ''; $('tel').value = p.tel || ''; $('email').value = p.email || '';
+    $('lgpd').checked = false; $('msg').textContent = '';
+    show('s-dados');
+  }
+
+  function done(m){
+    var r = store[m], i = INSTAGRAM[m], o = outraDe(m), ro = store[o];
+    $('numLabel').textContent = ro ? ('Seu número do sorteio (' + m + ')') : 'Seu número do sorteio';
+    $('numero').textContent = pad(r.numero);
+    $('numero').className = 'num' + cls(m);
+    $('ola').textContent = r.nome ? ('Obrigado, ' + r.nome.split(' ')[0] + '!') : 'Obrigado por participar!';
     $('ig').href = i.url;
     $('ig').textContent = 'Seguir ' + i.handle + ' no Instagram';
-    $('ig').className = 'btn ig' + (m==='Mirimóveis' ? ' miri' : '');
+    $('ig').className = 'btn ig' + cls(m);
+    var out = $('outra'); out.innerHTML = '';
+    if(ro){
+      var box = document.createElement('div'); box.className = 'box';
+      box.innerHTML = 'Você também participa pela <b>' + o + '</b> com o número <b>' + pad(ro.numero) + '</b>.<br>Siga também ';
+      var a = document.createElement('a'); a.className = 'lnk'; a.href = INSTAGRAM[o].url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = INSTAGRAM[o].handle;
+      box.appendChild(a); box.appendChild(document.createTextNode(' e retire o brinde no estande.'));
+      out.appendChild(box);
+    } else {
+      var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn ghost' + cls(o);
+      btn.textContent = 'Participar também pela ' + o + ' (mais uma chance!)';
+      btn.addEventListener('click', function(){ openForm(o); });
+      out.appendChild(btn);
+    }
     show('s-ok');
   }
 
   document.querySelectorAll('.brand').forEach(function(b){
     b.addEventListener('click', function(){
-      marca = b.dataset.marca;
-      $('marcaTxt').textContent = marca;
-      $('enviar').className = 'btn' + (marca==='Mirimóveis' ? ' miri' : '');
-      show('s-dados');
+      var m = b.dataset.marca;
+      if(store[m] && store[m].numero) done(m); else openForm(m);
     });
   });
   $('trocar').addEventListener('click', function(){show('s-marca')});
@@ -171,7 +209,7 @@
       .then(function(r){return r.json()})
       .then(function(j){
         clearTimeout(t);
-        if(j && j.ok){ save({numero:j.numero, nome:nome, marca:marca}); done(j.numero, nome, marca); }
+        if(j && j.ok){ store[marca] = {numero:j.numero, nome:nome, tel:tel, email:email}; store.last = marca; saveAll(store); done(marca); }
         else if(j && j.erro==='limite'){ msg.textContent='As inscrições estão encerradas. Procure a equipe no estande.'; }
         else { throw new Error('resp'); }
       })
@@ -179,10 +217,9 @@
       .then(function(){ btn.disabled=false; btn.textContent='Participar do sorteio'; });
   });
 
-  // Para testes: abrir o link com ?novo limpa o número salvo neste aparelho
-  if(/[?&]novo\b/.test(location.search)){ try{localStorage.removeItem(KEY)}catch(e){} history.replaceState(null,'',location.pathname); }
-  var s = load();
-  if(s && s.numero && INSTAGRAM[s.marca]) done(s.numero, s.nome, s.marca);
+  // Para testes: abrir o link com ?novo limpa os números salvos neste aparelho
+  if(/[?&]novo\b/.test(location.search)){ try{localStorage.removeItem(KEY);localStorage.removeItem(OLD)}catch(e){} store = {}; history.replaceState(null,'',location.pathname); }
+  if(store.last && store[store.last] && INSTAGRAM[store.last]) done(store.last);
 })();
 </script>
 </body>

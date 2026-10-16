@@ -2,7 +2,8 @@
  * Sorteio Grupo Plasfran - recebe o formulário e grava na planilha.
  * Uma única aba ("Leads") para as duas marcas; a coluna "Marca" diz de onde veio cada lead.
  * Número do sorteio = sequência única (1, 2, 3...) na ordem de preenchimento.
- * Mesmo telefone OU mesmo e-mail => devolve o número já existente, sem nova linha.
+ * Mesmo telefone OU mesmo e-mail NA MESMA MARCA => devolve o número já existente, sem nova linha.
+ * A mesma pessoa pode se cadastrar uma vez em cada marca (2 linhas, 2 números diferentes).
  */
 var LIMITE = 1000;
 var MARCAS = ['Plaspet', 'Mirimóveis'];
@@ -29,11 +30,12 @@ function doPost(e) {
     var maior = 0;
     var n = sh.getLastRow();
     if (n >= 2) {
-      var v = sh.getRange(2, 1, n - 1, 5).getValues();
+      var v = sh.getRange(2, 1, n - 1, 6).getValues();
       for (var r = 0; r < v.length; r++) {
         var num = Number(v[r][0]) || 0;
         if (num > maior) maior = num;
-        if (normTel(v[r][3]) === telKey || String(v[r][4]).trim().toLowerCase() === emailKey) {
+        var mesmaMarca = String(v[r][5]).trim() === marca;
+        if (mesmaMarca && (normTel(v[r][3]) === telKey || String(v[r][4]).trim().toLowerCase() === emailKey)) {
           return out({ ok: true, numero: num, repetido: true });
         }
       }
